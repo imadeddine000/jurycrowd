@@ -64,6 +64,16 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
     toast.success('Session killed');
   }, [terminalWindows]);
 
+  // Terminal toggle: only one terminal allowed — click again to close
+  const handleToggleTerminal = useCallback(() => {
+    const existing = terminalWindows.find((w) => w.title.startsWith('terminal #'));
+    if (existing) {
+      handleCloseTerminal(existing.id);
+    } else {
+      handleNewAgent('terminal');
+    }
+  }, [terminalWindows, handleCloseTerminal, handleNewAgent]);
+
   // Keyboard shortcuts: Escape closes side panel, Ctrl+K opens command palette
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -77,12 +87,12 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
   // Command palette commands
   const commands: Command[] = useMemo(() => [
     { label: 'New Agent', shortcut: 'Ctrl+N', action: () => setSidePanel('agents') },
-    { label: 'Open Terminal', action: () => handleNewAgent('terminal') },
+    { label: 'Toggle Terminal', action: () => handleToggleTerminal() },
     { label: 'Toggle Notes', action: () => setSidePanel(sidePanel === 'notes' ? null : 'notes') },
     { label: 'Toggle Skills', action: () => setSidePanel(sidePanel === 'skills' ? null : 'skills') },
     { label: 'Close Side Panel', shortcut: 'Esc', action: () => setSidePanel(null) },
     { label: 'Toggle Theme', action: () => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); } },
-  ], [sidePanel, handleNewAgent]);
+  ], [sidePanel, handleNewAgent, handleToggleTerminal]);
 
   // --- Panel layout persistence ---
   const layoutInitialized = useRef(false);
@@ -166,7 +176,7 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
           <Button variant="ghost" size="sm" className={cn('gap-1.5', sidePanel === 'skills' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'skills' ? null : 'skills')}>
             <BookOpen className="h-3.5 w-3.5" /> Skills
           </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleNewAgent('terminal')}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleToggleTerminal}>
             <TerminalSquare className="h-3.5 w-3.5" /> Terminal
           </Button>
           <Button variant="outline" size="sm" className={cn('gap-1.5', sidePanel === 'agents' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'agents' ? null : 'agents')}>
