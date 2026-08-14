@@ -63,15 +63,18 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
     toast.success('Session killed');
   }, [terminalWindows]);
 
+  // Separate agent windows from the utility terminal window
+  const agentWindows = useMemo(() => terminalWindows.filter((w) => !w.title.startsWith('terminal #')), [terminalWindows]);
+  const terminalWin = useMemo(() => terminalWindows.find((w) => w.title.startsWith('terminal #')), [terminalWindows]);
+
   // Terminal toggle: only one terminal allowed — click again to close
   const handleToggleTerminal = useCallback(() => {
-    const existing = terminalWindows.find((w) => w.title.startsWith('terminal #'));
-    if (existing) {
-      handleCloseTerminal(existing.id);
+    if (terminalWin) {
+      handleCloseTerminal(terminalWin.id);
     } else {
       handleNewAgent('terminal');
     }
-  }, [terminalWindows, handleCloseTerminal, handleNewAgent]);
+  }, [terminalWin, handleCloseTerminal, handleNewAgent]);
 
   // Keyboard shortcuts: Escape closes side panel, Ctrl+K opens command palette
   useEffect(() => {
@@ -104,23 +107,23 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
     if (!layoutInitialized.current) { layoutInitialized.current = true; return; }
     const total = sizes.reduce((a, b) => a + b, 0);
     if (total === 0) return;
-    const updates = terminalWindows.map((tw, i) => ({ id: tw.id, width: Math.round((sizes[i] / total) * 10000) / 100 }));
+    const updates = agentWindows.map((tw, i) => ({ id: tw.id, width: Math.round((sizes[i] / total) * 10000) / 100 }));
     debouncedSaveLayout(updates);
-  }, [terminalWindows, debouncedSaveLayout]);
+  }, [agentWindows, debouncedSaveLayout]);
 
-  // --- Terminal content (reused in both layouts) ---
-  const terminalsContent = terminalWindows.length === 0 ? (
+  // --- Main content: agents (horizontal, top) + terminal (bottom, vertical resize) ---
+  const agentsContent = agentWindows.length === 0 ? (
     <div className="flex h-full flex-col items-center justify-center text-center">
       <TerminalSquare className="h-12 w-12 text-muted-foreground/30" />
       <p className="mt-4 text-sm text-muted-foreground">No agents running</p>
-      <p className="mt-1 text-xs text-muted-foreground/60">Click "New agent" to launch a terminal.</p>
+      <p className="mt-1 text-xs text-muted-foreground/60">Click "New agent" to launch an agent.</p>
     </div>
   ) : (
     <ResizablePanelGroup direction="horizontal" onLayout={handleLayout}>
-      {terminalWindows.flatMap((tw, i) => {
+      {agentWindows.flatMap((tw, i) => {
         const elements: React.ReactNode[] = [];
         if (i > 0) elements.push(<ResizableHandle key={`h-${tw.id}`} withHandle />);
-        const savedSize = tw.width > 0 && tw.width <= 100 ? tw.width : 100 / terminalWindows.length;
+        const savedSize = tw.width > 0 && tw.width <= 100 ? tw.width : 100 / agentWindows.length;
         elements.push(
           <ResizablePanel key={tw.id} defaultSize={savedSize} minSize={10}>
             <TerminalPane window={tw} onKill={() => handleCloseTerminal(tw.id)} tmuxSessionName={sessionMap.get(tw.refId ?? '')?.tmuxSession ?? ''} />
@@ -129,6 +132,20 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
         return elements;
       })}
     </ResizablePanelGroup>
+  );
+
+  const terminalsContent = terminalWin ? (
+    <ResizablePanelGroup direction="vertical">
+      <ResizablePanel defaultSize={70} minSize={20}>
+        {agentsContent}
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={30} minSize={10} maxSize={85}>
+        <TerminalPane window={terminalWin} onKill={() => handleCloseTerminal(terminalWin.id)} tmuxSessionName={sessionMap.get(terminalWin.refId ?? '')?.tmuxSession ?? ''} />
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  ) : (
+    agentsContent
   );
 
   // --- Side panel content (only for agents picker now) ---
