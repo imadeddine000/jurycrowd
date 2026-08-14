@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Folder, FolderPlus, Loader2, MoreVertical, Pencil, Trash2, Sun, Moon } from 'lucide-react';
+import { Folder, FolderPlus, Loader2, MoreVertical, Pencil, Trash2, Sun, Moon, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WorkspaceSidebarProps {
@@ -69,6 +69,9 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCreateOpen(true)}>
             <FolderPlus className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { localStorage.removeItem('authToken'); window.location.reload(); }}>
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>
