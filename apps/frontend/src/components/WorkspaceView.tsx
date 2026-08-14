@@ -142,7 +142,7 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
       </div>
       <div className="flex-1 overflow-hidden">
         <div className="space-y-1 p-2">
-          {agents.map((a) => (
+          {agents.filter((a) => a.type !== 'terminal').map((a) => (
             <button key={a.type} disabled={!a.available} onClick={() => handleNewAgent(a.type)}
               className={cn('flex w-full items-center gap-2 border px-3 py-2 text-left text-sm transition-colors', a.available ? 'hover:bg-accent' : 'cursor-not-allowed opacity-50')}>
               <TerminalSquare className="h-4 w-4 text-muted-foreground" />
