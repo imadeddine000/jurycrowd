@@ -3,7 +3,7 @@ import { spawn } from 'node-pty';
 import type { Server } from 'node:http';
 import { prisma } from '../db.js';
 import * as tmux from '../tmux/tmuxManager.js';
-import { verifyToken } from '../auth.js';
+import { verifyToken, parseCookies, AUTH_COOKIE_NAME } from '../auth.js';
 
 /**
  * Terminal WS Gateway (§5).
@@ -29,8 +29,8 @@ export function setupTerminalGateway(server: Server): WebSocketServer {
 
     const sessionId = match[1];
 
-    // Validate auth token from query string
-    const token = url.searchParams.get('token');
+    // Validate auth token from cookie
+    const token = parseCookies(request.headers.cookie)[AUTH_COOKIE_NAME];
     if (!token) {
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
       socket.destroy();
