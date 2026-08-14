@@ -12,10 +12,7 @@ import type {
 const API_BASE = '/api';
 
 async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
-  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
-  const headers: Record<string, string> = { ...(init?.headers as Record<string, string>) };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(url, { ...init, headers });
+  const res = await fetch(url, { ...init, credentials: 'include' });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(body.error || `Request failed: ${res.status}`);
@@ -23,24 +20,23 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** Like fetchJSON but for void responses (DELETE, 204 No Content). Includes auth token. */
+/** Like fetchJSON but for void responses (DELETE, 204 No Content). */
 async function fetchVoid(url: string, init?: RequestInit): Promise<void> {
-  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
-  const headers: Record<string, string> = { ...(init?.headers as Record<string, string>) };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(url, { ...init, headers });
+  const res = await fetch(url, { ...init, credentials: 'include' });
   if (!res.ok && res.status !== 204) {
     throw new Error(`Request failed: ${res.status}`);
   }
 }
 
 export const api = {
-  // Auth
+  // Auth (cookie-based — no token in localStorage)
   authStatus: () => fetchJSON<{ setupRequired: boolean }>(`${API_BASE}/auth/status`),
+  authMe: () => fetchJSON<{ authenticated: boolean }>(`${API_BASE}/auth/me`),
   authSetup: (password: string) =>
-    fetchJSON<{ token: string }>(`${API_BASE}/auth/setup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) }),
+    fetchJSON<{ authenticated: boolean }>(`${API_BASE}/auth/setup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) }),
   authLogin: (password: string) =>
-    fetchJSON<{ token: string }>(`${API_BASE}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) }),
+    fetchJSON<{ authenticated: boolean }>(`${API_BASE}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) }),
+  authLogout: () => fetchJSON<{ authenticated: boolean }>(`${API_BASE}/auth/logout`, { method: 'POST' }),
 
   // Workspaces
   listWorkspaces: () => fetchJSON<WorkspaceDTO[]>(`${API_BASE}/workspaces`),

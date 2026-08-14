@@ -23,10 +23,11 @@ export function LoginPage({ onAuthenticated }: LoginPageProps) {
     if (!password.trim()) return;
     setLoading(true); setError('');
     try {
-      const { token } = setupRequired
-        ? await api.authSetup(password)
-        : await api.authLogin(password);
-      localStorage.setItem('authToken', token);
+      if (setupRequired) {
+        await api.authSetup(password);
+      } else {
+        await api.authLogin(password);
+      }
       onAuthenticated();
     } catch (e) {
       setError((e as Error).message || 'Authentication failed');

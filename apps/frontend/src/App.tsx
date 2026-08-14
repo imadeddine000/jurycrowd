@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
 import { AppShell } from '@/components/AppShell';
 import { LoginPage } from '@/components/LoginPage';
+import { api } from '@/lib/api';
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setAuthenticated(!!token);
+    // Check auth via cookie-based /api/auth/me endpoint
+    api.authMe()
+      .then(() => setAuthenticated(true))
+      .catch(() => setAuthenticated(false));
   }, []);
 
   return (

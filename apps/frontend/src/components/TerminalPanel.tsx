@@ -33,7 +33,7 @@ export function TerminalPanel({ sessionId, onStatusChange }: TerminalPanelProps)
 
     // Connect to WS
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws/terminal/${sessionId}?token=${localStorage.getItem('authToken') ?? ''}`;
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws/terminal/${sessionId}`;
     const ws = new WebSocket(wsUrl);
 
     ws.binaryType = 'arraybuffer';
