@@ -3,7 +3,8 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Lock } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, TerminalSquare } from 'lucide-react';
 
 interface LoginPageProps {
   onAuthenticated: () => void;
@@ -41,23 +42,56 @@ export function LoginPage({ onAuthenticated }: LoginPageProps) {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-sm space-y-4 p-6">
-        <div className="flex flex-col items-center gap-2">
-          <Lock className="h-8 w-8 text-muted-foreground" />
-          <h1 className="text-xl font-semibold">JuryCrowd</h1>
-          <p className="text-sm text-muted-foreground">
-            {setupRequired ? 'Set your admin password to get started.' : 'Enter your password to log in.'}
-          </p>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md">
+        {/* Brand header */}
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
+            <TerminalSquare className="h-7 w-7" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">JuryCrowd</h1>
+          <p className="text-sm text-muted-foreground">Agent Workspace Manager</p>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} />
-        </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        <Button className="w-full" onClick={handleSubmit} disabled={loading || !password.trim()}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : setupRequired ? 'Set Password' : 'Log In'}
-        </Button>
+
+        <Card className="border-border/60 shadow-xl">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-xl">
+              {setupRequired ? 'Welcome' : 'Welcome back'}
+            </CardTitle>
+            <CardDescription>
+              {setupRequired
+                ? 'Set your admin password to get started. You\'ll use this every time you log in.'
+                : 'Enter your password to access your workspaces.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                className="h-10"
+                autoFocus
+              />
+            </div>
+            {error && (
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full" size="lg" onClick={handleSubmit} disabled={loading || !password.trim()}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : setupRequired ? 'Set Password & Continue' : 'Log In'}
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground/60">
+          JuryCrowd · Local-first agent workspace
+        </p>
       </div>
     </div>
   );
