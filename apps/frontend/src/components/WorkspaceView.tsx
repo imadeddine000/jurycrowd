@@ -6,6 +6,8 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import { TerminalPane } from './TerminalPane';
 import { MarkdownFilesPanel } from './MarkdownFilesPanel';
 import { GitHubPanel } from './GitHubPanel';
+import { CommandPalette } from './CommandPalette';
+import type { Command } from './CommandPalette';
 import { useDebouncedCallback } from '@/hooks/useDebounced';
 import { Plus, TerminalSquare, Folder, FileText, BookOpen, Github, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,6 +24,7 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
   const [terminalWindows, setTerminalWindows] = useState<AppWindowDTO[]>([]);
   const [sessions, setSessions] = useState<AgentSessionDTO[]>([]);
   const [sidePanel, setSidePanel] = useState<SidePanel>(null);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   const sessionMap = useMemo(() => {
     const m = new Map<string, AgentSessionDTO>();
@@ -61,14 +64,25 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
     toast.success('Session killed');
   }, [terminalWindows]);
 
-  // Keyboard shortcut: Escape closes side panel
+  // Keyboard shortcuts: Escape closes side panel, Ctrl+K opens command palette
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && sidePanel) setSidePanel(null);
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setShowCommandPalette((v) => !v); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [sidePanel]);
+
+  // Command palette commands
+  const commands: Command[] = useMemo(() => [
+    { label: 'New Agent', shortcut: 'Ctrl+N', action: () => setSidePanel('agents') },
+    { label: 'Toggle Notes', action: () => setSidePanel(sidePanel === 'notes' ? null : 'notes') },
+    { label: 'Toggle Skills', action: () => setSidePanel(sidePanel === 'skills' ? null : 'skills') },
+    { label: 'Toggle GitHub', action: () => setSidePanel(sidePanel === 'github' ? null : 'github') },
+    { label: 'Close Side Panel', shortcut: 'Esc', action: () => setSidePanel(null) },
+    { label: 'Toggle Theme', action: () => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); } },
+  ], [sidePanel]);
 
   // --- Panel layout persistence ---
   const layoutInitialized = useRef(false);
@@ -177,6 +191,9 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
           terminalsContent
         )}
       </div>
+
+      {/* Command palette */}
+      <CommandPalette open={showCommandPalette} onOpenChange={setShowCommandPalette} commands={commands} />
     </div>
   );
 }

@@ -3,7 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agent Workspace</title>
+    <title>JuryCrowd</title>
+    <script>
+      // Apply saved theme before render to avoid flash
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (theme === 'light') document.documentElement.classList.remove('dark');
+        else document.documentElement.classList.add('dark');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
