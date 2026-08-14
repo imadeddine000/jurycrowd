@@ -7,3 +7,4 @@ dist
 .DS_Store
 tasks
 *.log
+DESIGN.md
