@@ -2,13 +2,17 @@
 
 ## Authentication
 
-JuryCrowd uses a simple admin password authentication system:
+JuryCrowd uses a secure cookie-based admin password authentication system:
 
 - On first run, you'll be prompted to set an admin password
 - The password is hashed (SHA-256) and stored in `~/.jurycrowd/config.json`
-- All API requests require a Bearer token (the password hash) in the `Authorization` header
-- WebSocket connections require the token as a `?token=` query parameter
-- Without a valid token, no API or WebSocket access is possible
+- On login, the server sets an **HttpOnly** cookie (`jurycrowd_auth`) containing the hash
+- All API requests are authenticated via this cookie (sent automatically by the browser)
+- WebSocket connections validate the same cookie from the upgrade request headers
+- The cookie is `SameSite=Lax` (CSRF protection) and `Secure` in production (HTTPS only)
+- **No token is ever stored in localStorage** — this prevents XSS token theft
+- The cookie expires after 7 days
+- Logout clears the cookie via `POST /api/auth/logout`
 
 ## Important: Local-First Application
 
