@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import { prisma } from '../db.js';
+import { killSession } from '../tmux/tmuxManager.js';
 import type { CreateWorkspaceBody, UpdateWorkspaceBody, WorkspaceDTO } from '@jurycrowd/shared';
 
 export const workspacesRouter = Router();
@@ -139,7 +140,7 @@ workspacesRouter.patch('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/workspaces/:id — delete workspace (DB record; disk dir left intact)
+// DELETE /api/workspaces/:id — delete workspace (DB + tmux sessions + disk directory)
 workspacesRouter.delete('/:id', async (req, res) => {
   try {
     const existing = await prisma.workspace.findUnique({
@@ -150,7 +151,23 @@ workspacesRouter.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Workspace not found' });
     }
 
-    // Cascade deletes handle related sessions, windows, notes, skills, github
+    // 1. Kill all tmux sessions for this workspace's agents
+    const sessions = await prisma.agentSession.findMany({
+      where: { workspaceId: req.params.id },
+    });
+    for (const s of sessions) {
+      try { killSession(s.tmuxSession); } catch {}
+    }
+
+    // 2. Remove the workspace directory from disk
+    try {
+      await fs.rm(existing.cwd, { recursive: true, force: true });
+    } catch (err) {
+      console.error('[workspaces] failed to remove directory:', err);
+      // Continue anyway — DB cleanup is more important
+    }
+
+    // 3. Delete DB record (cascade deletes handle sessions, windows, etc.)
     await prisma.workspace.delete({
       where: { id: req.params.id },
     });
