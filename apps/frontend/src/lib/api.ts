@@ -23,6 +23,17 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/** Like fetchJSON but for void responses (DELETE, 204 No Content). Includes auth token. */
+async function fetchVoid(url: string, init?: RequestInit): Promise<void> {
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
+  const headers: Record<string, string> = { ...(init?.headers as Record<string, string>) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(url, { ...init, headers });
+  if (!res.ok && res.status !== 204) {
+    throw new Error(`Request failed: ${res.status}`);
+  }
+}
+
 export const api = {
   // Auth
   authStatus: () => fetchJSON<{ setupRequired: boolean }>(`${API_BASE}/auth/status`),
@@ -50,12 +61,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  deleteWorkspace: (id: string) =>
-    fetch(`${API_BASE}/workspaces/${id}`, { method: 'DELETE' }).then((res) => {
-      if (!res.ok && res.status !== 204) {
-        throw new Error(`Delete failed: ${res.status}`);
-      }
-    }),
+  deleteWorkspace: (id: string) => fetchVoid(`${API_BASE}/workspaces/${id}`, { method: 'DELETE' }),
 
   // Windows (AppWindow)
   listWindows: (kind?: string) =>
@@ -80,12 +86,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  deleteWindow: (id: string) =>
-    fetch(`${API_BASE}/windows/${id}`, { method: 'DELETE' }).then((res) => {
-      if (!res.ok && res.status !== 204) {
-        throw new Error(`Delete failed: ${res.status}`);
-      }
-    }),
+  deleteWindow: (id: string) => fetchVoid(`${API_BASE}/windows/${id}`, { method: 'DELETE' }),
 
   // Sessions (AgentSession)
   listSessions: (workspaceId: string) =>
@@ -98,12 +99,7 @@ export const api = {
       body: JSON.stringify({ agentType }),
     }),
 
-  killSession: (sessionId: string) =>
-    fetch(`${API_BASE}/sessions/${sessionId}`, { method: 'DELETE' }).then((res) => {
-      if (!res.ok && res.status !== 204) {
-        throw new Error(`Kill failed: ${res.status}`);
-      }
-    }),
+  killSession: (sessionId: string) => fetchVoid(`${API_BASE}/sessions/${sessionId}`, { method: 'DELETE' }),
 
   sendText: (sessionId: string, text: string) =>
     fetchJSON<{ success: boolean }>(`${API_BASE}/sessions/${sessionId}/send-text`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) }),
@@ -118,8 +114,7 @@ export const api = {
     fetchJSON<{ name: string }>(`${API_BASE}/notes/${wsId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, content }) }),
   updateNote: (wsId: string, name: string, body: { content?: string; newName?: string }) =>
     fetchJSON<{ name: string }>(`${API_BASE}/notes/${wsId}/${name}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
-  deleteNote: (wsId: string, name: string) =>
-    fetch(`${API_BASE}/notes/${wsId}/${name}`, { method: 'DELETE' }).then((res) => { if (!res.ok && res.status !== 204) throw new Error(`Delete failed: ${res.status}`); }),
+  deleteNote: (wsId: string, name: string) => fetchVoid(`${API_BASE}/notes/${wsId}/${name}`, { method: 'DELETE' }),
 
   // Skills (markdown files on disk)
   listSkills: (wsId: string) => fetchJSON<string[]>(`${API_BASE}/skills/${wsId}`),
@@ -128,8 +123,7 @@ export const api = {
     fetchJSON<{ name: string }>(`${API_BASE}/skills/${wsId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, content }) }),
   updateSkill: (wsId: string, name: string, body: { content?: string; newName?: string }) =>
     fetchJSON<{ name: string }>(`${API_BASE}/skills/${wsId}/${name}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
-  deleteSkill: (wsId: string, name: string) =>
-    fetch(`${API_BASE}/skills/${wsId}/${name}`, { method: 'DELETE' }).then((res) => { if (!res.ok && res.status !== 204) throw new Error(`Delete failed: ${res.status}`); }),
+  deleteSkill: (wsId: string, name: string) => fetchVoid(`${API_BASE}/skills/${wsId}/${name}`, { method: 'DELETE' }),
 
   // GitHub integration
   githubConnect: (token: string) =>
