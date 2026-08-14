@@ -5,6 +5,9 @@ import { workspacesRouter } from './routes/workspaces.js';
 import { windowsRouter } from './routes/windows.js';
 import { sessionsRouter } from './routes/sessions.js';
 import { createFilesRouter } from './routes/files.js';
+import { githubRouter } from './routes/github.js';
+import { authRouter } from './routes/authRoutes.js';
+import { authMiddleware } from './auth.js';
 import { reconcileSessions } from './reconcile.js';
 import { setupTerminalGateway } from './ws/terminalGateway.js';
 
@@ -20,6 +23,12 @@ app.get('/api/health', (_req, res) => {
   res.json(body);
 });
 
+// Auth routes (public — no middleware)
+app.use('/api/auth', authRouter);
+
+// Auth middleware — protects all other /api routes
+app.use('/api', authMiddleware);
+
 // Workspace CRUD
 app.use('/api/workspaces', workspacesRouter);
 
@@ -32,6 +41,9 @@ app.use('/api', sessionsRouter);
 // Notes & Skills (real files on disk inside workspace cwd)
 app.use('/api/notes', createFilesRouter('notes'));
 app.use('/api/skills', createFilesRouter('skills'));
+
+// GitHub integration
+app.use('/api/github', githubRouter);
 
 const server = app.listen(PORT, async () => {
   console.log(`[backend] listening on http://localhost:${PORT}`);

@@ -47,3 +47,8 @@ export function listSessions(): string[] {
 export function resizeWindow(name: string, cols: number, rows: number): boolean {
   return run(`tmux resize-window -t ${JSON.stringify(name)} -x ${cols} -y ${rows} 2>/dev/null`).ok;
 }
+
+/** Send text (keystrokes) to a tmux session — used for drag-and-drop file paths. */
+export function sendKeys(name: string, text: string): boolean {
+  return run(`tmux send-keys -t ${JSON.stringify(name)} ${JSON.stringify(text)} Enter`).ok;
+}
