@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Folder, FolderPlus, Loader2, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Folder, FolderPlus, Loader2, MoreVertical, Pencil, Trash2, Sun, Moon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WorkspaceSidebarProps {
@@ -59,9 +59,18 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
     <div className="flex h-full flex-col bg-secondary/30">
       <div className="flex items-center justify-between border-b px-3 py-2.5">
         <span className="text-sm font-semibold">Workspaces</span>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCreateOpen(true)}>
-          <FolderPlus className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          }}>
+            <Sun className="h-4 w-4 hidden dark:block" />
+            <Moon className="h-4 w-4 block dark:hidden" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCreateOpen(true)}>
+            <FolderPlus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto py-1">

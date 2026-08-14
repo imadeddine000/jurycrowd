@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { AgentRegistryEntry, WorkspaceDTO } from '@jurycrowd/shared';
+import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { WorkspaceSidebar } from './WorkspaceSidebar';
@@ -51,11 +52,13 @@ export function AppShell() {
     const ws = await api.createWorkspace({ title });
     setWorkspaces((prev) => [ws, ...prev]);
     handleSelect(ws.id);
+    toast.success('Workspace created');
   }, [handleSelect]);
 
   const handleRename = useCallback(async (id: string, title: string) => {
     const ws = await api.updateWorkspace(id, { title });
     setWorkspaces((prev) => prev.map((w) => (w.id === id ? ws : w)));
+    toast.success('Workspace renamed');
   }, []);
 
   const handleDelete = useCallback(async (id: string) => {
@@ -63,6 +66,7 @@ export function AppShell() {
     setWorkspaces((prev) => prev.filter((w) => w.id !== id));
     setOpenIds((prev) => prev.filter((x) => x !== id));
     if (activeId === id) setActiveId(null);
+    toast.success('Workspace deleted');
   }, [activeId]);
 
   if (loading) {

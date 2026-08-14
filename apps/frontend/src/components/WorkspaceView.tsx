@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { TerminalPane } from './TerminalPane';
 import { MarkdownFilesPanel } from './MarkdownFilesPanel';
+import { GitHubPanel } from './GitHubPanel';
 import { useDebouncedCallback } from '@/hooks/useDebounced';
-import { Plus, TerminalSquare, Folder, FileText, BookOpen, X } from 'lucide-react';
+import { Plus, TerminalSquare, Folder, FileText, BookOpen, Github, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface WorkspaceViewProps {
@@ -14,7 +16,7 @@ interface WorkspaceViewProps {
   agents: AgentRegistryEntry[];
 }
 
-type SidePanel = null | 'notes' | 'skills' | 'agents';
+type SidePanel = null | 'notes' | 'skills' | 'agents' | 'github';
 
 export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
   const [terminalWindows, setTerminalWindows] = useState<AppWindowDTO[]>([]);
@@ -47,6 +49,7 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
       setTerminalWindows((prev) => [...prev, newWin]);
       setSessions((prev) => [...prev, session]);
       setSidePanel(null);
+      toast.success(`Agent launched: ${agentType}`);
     } catch (err) { console.error('Failed to create agent:', err); }
   }, [workspace.id, terminalWindows]);
 
@@ -55,7 +58,17 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
     setTerminalWindows((prev) => prev.filter((w) => w.id !== windowId));
     if (tw?.refId) { try { await api.killSession(tw.refId); } catch {} }
     try { await api.deleteWindow(windowId); } catch {}
+    toast.success('Session killed');
   }, [terminalWindows]);
+
+  // Keyboard shortcut: Escape closes side panel
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && sidePanel) setSidePanel(null);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [sidePanel]);
 
   // --- Panel layout persistence ---
   const layoutInitialized = useRef(false);
@@ -96,7 +109,7 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
   );
 
   // --- Side panel content ---
-  const sidePanelTitle = sidePanel === 'notes' ? 'Notes' : sidePanel === 'skills' ? 'Skills' : 'New Agent';
+  const sidePanelTitle = sidePanel === 'notes' ? 'Notes' : sidePanel === 'skills' ? 'Skills' : sidePanel === 'github' ? 'GitHub' : 'New Agent';
 
   const sidePanelContent = (
     <div className="flex h-full flex-col bg-card">
@@ -109,6 +122,7 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
       <div className="flex-1 overflow-hidden">
         {sidePanel === 'notes' && <MarkdownFilesPanel workspaceId={workspace.id} kind="notes" />}
         {sidePanel === 'skills' && <MarkdownFilesPanel workspaceId={workspace.id} kind="skills" />}
+        {sidePanel === 'github' && <GitHubPanel workspaceId={workspace.id} />}
         {sidePanel === 'agents' && (
           <div className="space-y-1 p-2">
             {agents.map((a) => (
@@ -137,6 +151,9 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
           </Button>
           <Button variant="ghost" size="sm" className={cn('gap-1.5', sidePanel === 'skills' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'skills' ? null : 'skills')}>
             <BookOpen className="h-3.5 w-3.5" /> Skills
+          </Button>
+          <Button variant="ghost" size="sm" className={cn('gap-1.5', sidePanel === 'github' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'github' ? null : 'github')}>
+            <Github className="h-3.5 w-3.5" /> GitHub
           </Button>
           <Button variant="outline" size="sm" className={cn('gap-1.5', sidePanel === 'agents' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'agents' ? null : 'agents')}>
             <Plus className="h-3.5 w-3.5" /> New agent

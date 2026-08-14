@@ -69,7 +69,7 @@ export function MarkdownFilesPanel({ workspaceId, kind }: MarkdownFilesPanelProp
         </div>
         <div className="mt-1 max-h-32 overflow-y-auto">
           {files.map((name) => (
-            <div key={name} className={cn('group flex items-center gap-1 rounded px-2 py-1 text-sm cursor-pointer', selected === name ? 'bg-accent' : 'hover:bg-secondary')} onClick={() => loadFile(name)}>
+            <div key={name} draggable onDragStart={(e) => { e.dataTransfer.setData('text/plain', `.agent-workspace/${kind}/${name}.md`); }} className={cn('group flex items-center gap-1 rounded px-2 py-1 text-sm cursor-pointer', selected === name ? 'bg-accent' : 'hover:bg-secondary')} onClick={() => loadFile(name)}>
               <FileText className="h-3 w-3 shrink-0 text-muted-foreground" />
               <span className="flex-1 truncate">{name}</span>
               <button className="p-0.5 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); handleDelete(name); }}>

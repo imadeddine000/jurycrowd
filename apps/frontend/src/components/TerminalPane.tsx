@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { TerminalPanel } from './TerminalPanel';
+import { api } from '@/lib/api';
 import { TerminalSquare, MoreVertical, Skull, Copy, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -37,10 +38,30 @@ const statusColors: Record<string, string> = {
 export function TerminalPane({ window: win, onKill, tmuxSessionName }: TerminalPaneProps) {
   const [status, setStatus] = useState('connecting');
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   const handleCopySessionName = useCallback(() => {
     navigator.clipboard.writeText(tmuxSessionName).catch(() => {});
   }, [tmuxSessionName]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const sessionId = win.refId;
+    if (!sessionId) return;
+    // Check for note/skill drag data (file path)
+    const filePath = e.dataTransfer.getData('text/plain');
+    if (filePath) {
+      api.sendText(sessionId, filePath).catch(() => {});
+      return;
+    }
+    // OS file drop — send file names
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      const text = files.map((f) => f.name).join(' ');
+      api.sendText(sessionId, text).catch(() => {});
+    }
+  }, [win.refId]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden border-b border-r bg-card">
@@ -75,8 +96,18 @@ export function TerminalPane({ window: win, onKill, tmuxSessionName }: TerminalP
         </div>
       </div>
       {/* Terminal */}
-      <div className="flex-1 overflow-hidden">
+      <div
+        className={cn('flex-1 overflow-hidden relative', dragOver && 'ring-2 ring-primary ring-inset bg-primary/5')}
+        onDrop={handleDrop}
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+      >
         <TerminalPanel sessionId={win.refId ?? ''} onStatusChange={setStatus} />
+        {dragOver && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/80 pointer-events-none">
+            <span className="text-sm text-muted-foreground">Drop to send to terminal</span>
+          </div>
+        )}
       </div>
 
       {/* Close confirmation dialog */}

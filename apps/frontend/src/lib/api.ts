@@ -12,7 +12,10 @@ import type {
 const API_BASE = '/api';
 
 async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init);
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
+  const headers: Record<string, string> = { ...(init?.headers as Record<string, string>) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(url, { ...init, headers });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(body.error || `Request failed: ${res.status}`);
@@ -21,6 +24,13 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  // Auth
+  authStatus: () => fetchJSON<{ setupRequired: boolean }>(`${API_BASE}/auth/status`),
+  authSetup: (password: string) =>
+    fetchJSON<{ token: string }>(`${API_BASE}/auth/setup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) }),
+  authLogin: (password: string) =>
+    fetchJSON<{ token: string }>(`${API_BASE}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) }),
+
   // Workspaces
   listWorkspaces: () => fetchJSON<WorkspaceDTO[]>(`${API_BASE}/workspaces`),
 
@@ -95,6 +105,9 @@ export const api = {
       }
     }),
 
+  sendText: (sessionId: string, text: string) =>
+    fetchJSON<{ success: boolean }>(`${API_BASE}/sessions/${sessionId}/send-text`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) }),
+
   // Agents
   listAgents: () => fetchJSON<AgentRegistryEntry[]>(`${API_BASE}/agents`),
 
@@ -117,4 +130,15 @@ export const api = {
     fetchJSON<{ name: string }>(`${API_BASE}/skills/${wsId}/${name}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
   deleteSkill: (wsId: string, name: string) =>
     fetch(`${API_BASE}/skills/${wsId}/${name}`, { method: 'DELETE' }).then((res) => { if (!res.ok && res.status !== 204) throw new Error(`Delete failed: ${res.status}`); }),
+
+  // GitHub integration
+  githubConnect: (token: string) =>
+    fetchJSON<{ connected: boolean }>(`${API_BASE}/github/connect`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) }),
+  githubDisconnect: () =>
+    fetchJSON<{ connected: boolean }>(`${API_BASE}/github/disconnect`, { method: 'POST' }),
+  githubConnected: () => fetchJSON<{ connected: boolean }>(`${API_BASE}/github/connected`),
+  githubRepos: (page = '1') => fetchJSON<Array<{ name: string; full_name: string; clone_url: string; private: boolean; default_branch: string }>>(`${API_BASE}/github/repos?page=${page}`),
+  githubClone: (workspaceId: string, cloneUrl: string) =>
+    fetchJSON<{ success: boolean }>(`${API_BASE}/github/clone`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ workspaceId, cloneUrl }) }),
+  githubStatus: (workspaceId: string) => fetchJSON<{ initialized: boolean; branch?: string; ahead?: number; behind?: number; dirty?: number }>(`${API_BASE}/github/status/${workspaceId}`),
 };
