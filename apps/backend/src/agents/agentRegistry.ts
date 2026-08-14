@@ -17,6 +17,7 @@ const AGENTS: AgentConfig[] = [
   { type: 'cline', label: 'Cline', command: 'cline' },
   { type: 'claude-code', label: 'Claude Code', command: 'claude' },
   { type: 'opencode', label: 'OpenCode', command: 'opencode' },
+  { type: 'terminal', label: 'Terminal', command: 'bash' },
 ];
 
 /** Check if a CLI command is available in PATH. */
