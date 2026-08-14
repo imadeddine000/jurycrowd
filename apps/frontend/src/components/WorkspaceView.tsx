@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { TerminalPane } from './TerminalPane';
 import { MarkdownFilesPanel } from './MarkdownFilesPanel';
-import { GitHubPanel } from './GitHubPanel';
 import { CommandPalette } from './CommandPalette';
 import type { Command } from './CommandPalette';
 import { useDebouncedCallback } from '@/hooks/useDebounced';
@@ -132,62 +131,63 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
     </ResizablePanelGroup>
   );
 
-  // --- Side panel content ---
-  const sidePanelTitle = sidePanel === 'notes' ? 'Notes' : sidePanel === 'skills' ? 'Skills' : sidePanel === 'github' ? 'GitHub' : 'New Agent';
-
+  // --- Side panel content (only for agents picker now) ---
   const sidePanelContent = (
     <div className="flex h-full flex-col bg-card">
       <div className="flex items-center justify-between border-b bg-secondary px-3 py-1.5">
-        <span className="text-sm font-medium">{sidePanelTitle}</span>
+        <span className="text-sm font-medium">New Agent</span>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSidePanel(null)}>
           <X className="h-3 w-3" />
         </Button>
       </div>
       <div className="flex-1 overflow-hidden">
-        {sidePanel === 'notes' && <MarkdownFilesPanel workspaceId={workspace.id} kind="notes" />}
-        {sidePanel === 'skills' && <MarkdownFilesPanel workspaceId={workspace.id} kind="skills" />}
-        {sidePanel === 'github' && <GitHubPanel workspaceId={workspace.id} />}
-        {sidePanel === 'agents' && (
-          <div className="space-y-1 p-2">
-            {agents.map((a) => (
-              <button key={a.type} disabled={!a.available} onClick={() => handleNewAgent(a.type)}
-                className={cn('flex w-full items-center gap-2 border px-3 py-2 text-left text-sm transition-colors', a.available ? 'hover:bg-accent' : 'cursor-not-allowed opacity-50')}>
-                <TerminalSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="flex-1">{a.label}</span>
-                {!a.available && <span className="text-xs text-muted-foreground">not installed</span>}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="space-y-1 p-2">
+          {agents.map((a) => (
+            <button key={a.type} disabled={!a.available} onClick={() => handleNewAgent(a.type)}
+              className={cn('flex w-full items-center gap-2 border px-3 py-2 text-left text-sm transition-colors', a.available ? 'hover:bg-accent' : 'cursor-not-allowed opacity-50')}>
+              <TerminalSquare className="h-4 w-4 text-muted-foreground" />
+              <span className="flex-1">{a.label}</span>
+              {!a.available && <span className="text-xs text-muted-foreground">not installed</span>}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
 
+  const isFullPageView = sidePanel === 'notes' || sidePanel === 'skills';
+
   return (
     <div className="flex h-full flex-col">
-      {/* Toolbar */}
-      <div className="flex items-center gap-2 border-b bg-secondary/30 px-3 py-1.5">
-        <Folder className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium">{workspace.title}</span>
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="sm" className={cn('gap-1.5', sidePanel === 'notes' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'notes' ? null : 'notes')}>
-            <FileText className="h-3.5 w-3.5" /> Notes
-          </Button>
-          <Button variant="ghost" size="sm" className={cn('gap-1.5', sidePanel === 'skills' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'skills' ? null : 'skills')}>
-            <BookOpen className="h-3.5 w-3.5" /> Skills
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleToggleTerminal}>
-            <TerminalSquare className="h-3.5 w-3.5" /> Terminal
-          </Button>
-          <Button variant="outline" size="sm" className={cn('gap-1.5', sidePanel === 'agents' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'agents' ? null : 'agents')}>
-            <Plus className="h-3.5 w-3.5" /> New agent
-          </Button>
+      {/* Toolbar — hidden when in full-page notes/skills view */}
+      {!isFullPageView && (
+        <div className="flex items-center gap-2 border-b bg-secondary/30 px-3 py-1.5">
+          <Folder className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium">{workspace.title}</span>
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setSidePanel('notes')}>
+              <FileText className="h-3.5 w-3.5" /> Notes
+            </Button>
+            <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setSidePanel('skills')}>
+              <BookOpen className="h-3.5 w-3.5" /> Skills
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleToggleTerminal}>
+              <TerminalSquare className="h-3.5 w-3.5" /> Terminal
+            </Button>
+            <Button variant="outline" size="sm" className={cn('gap-1.5', sidePanel === 'agents' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'agents' ? null : 'agents')}>
+              <Plus className="h-3.5 w-3.5" /> New agent
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Content: terminals + optional side panel */}
+      {/* Content */}
       <div className="flex-1 overflow-hidden">
-        {sidePanel ? (
+        {sidePanel === 'notes' ? (
+          <MarkdownFilesPanel workspaceId={workspace.id} kind="notes" onBack={() => setSidePanel(null)} />
+        ) : sidePanel === 'skills' ? (
+          <MarkdownFilesPanel workspaceId={workspace.id} kind="skills" onBack={() => setSidePanel(null)} />
+        ) : sidePanel === 'agents' ? (
           <ResizablePanelGroup direction="horizontal">
             <ResizablePanel defaultSize={70} minSize={30}>
               {terminalsContent}
