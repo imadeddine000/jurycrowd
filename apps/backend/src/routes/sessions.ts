@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../db.js';
 import * as tmux from '../tmux/tmuxManager.js';
 import { getAgent, isAgentAvailable, listAgents } from '../agents/agentRegistry.js';
+import { getApiKeyEnvVars } from '../apiKeys.js';
 import type { AgentSessionDTO, AgentRegistryEntry } from '@jurycrowd/shared';
 
 export const sessionsRouter = Router();
@@ -84,7 +85,9 @@ sessionsRouter.post('/workspaces/:workspaceId/sessions', async (req, res) => {
     const tmuxSessionName = generateTmuxSessionName(workspace.id, agentType, existingCount);
 
     // Create the tmux session (detached, running the agent CLI in the workspace cwd)
-    const created = tmux.createOrAttachDetached(tmuxSessionName, workspace.cwd, agent.command);
+    // Inject app-level API keys as environment variables
+    const envVars = await getApiKeyEnvVars();
+    const created = tmux.createOrAttachDetached(tmuxSessionName, workspace.cwd, agent.command, envVars);
     if (!created) {
       return res.status(500).json({ error: 'Failed to create tmux session' });
     }

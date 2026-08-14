@@ -21,12 +21,18 @@ export function sessionExists(name: string): boolean {
 
 /**
  * Create a new detached tmux session (or attach to existing if it already exists).
- * Runs the given command in the given cwd.
+ * Runs the given command in the given cwd, with optional environment variables.
  */
-export function createOrAttachDetached(name: string, cwd: string, command: string): boolean {
+export function createOrAttachDetached(name: string, cwd: string, command: string, env?: Record<string, string>): boolean {
+  // If env vars provided, prefix the command with exports
+  let fullCommand = command;
+  if (env && Object.keys(env).length > 0) {
+    const exports = Object.entries(env).map(([k, v]) => `export ${k}=${JSON.stringify(v)}`).join(' ');
+    fullCommand = `${exports}; ${command}`;
+  }
   // -A: attach if exists, -d: detached, -s: session name, -c: working dir
   const result = run(
-    `tmux new-session -A -d -s ${JSON.stringify(name)} -c ${JSON.stringify(cwd)} ${JSON.stringify(command)}`,
+    `tmux new-session -A -d -s ${JSON.stringify(name)} -c ${JSON.stringify(cwd)} ${JSON.stringify(fullCommand)}`,
   );
   return result.ok;
 }

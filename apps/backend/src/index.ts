@@ -6,6 +6,7 @@ import { windowsRouter } from './routes/windows.js';
 import { sessionsRouter } from './routes/sessions.js';
 import { createFilesRouter } from './routes/files.js';
 import { githubRouter } from './routes/github.js';
+import { apiKeysRouter } from './routes/apiKeysRoutes.js';
 import { authRouter } from './routes/authRoutes.js';
 import { authMiddleware } from './auth.js';
 import { reconcileSessions } from './reconcile.js';
@@ -44,6 +45,9 @@ app.use('/api/skills', createFilesRouter('skills'));
 
 // GitHub integration
 app.use('/api/github', githubRouter);
+
+// API Keys (app-level, not workspace-specific)
+app.use('/api/apikeys', apiKeysRouter);
 
 const server = app.listen(PORT, async () => {
   console.log(`[backend] listening on http://localhost:${PORT}`);
