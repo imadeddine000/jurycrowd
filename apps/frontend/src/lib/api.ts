@@ -131,4 +131,12 @@ export const api = {
   githubClone: (workspaceId: string, cloneUrl: string) =>
     fetchJSON<{ success: boolean }>(`${API_BASE}/github/clone`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ workspaceId, cloneUrl }) }),
   githubStatus: (workspaceId: string) => fetchJSON<{ initialized: boolean; branch?: string; ahead?: number; behind?: number; dirty?: number }>(`${API_BASE}/github/status/${workspaceId}`),
+
+  // API Keys (app-level — custom model endpoints + keys)
+  listApiKeys: () => fetchJSON<Array<{ id: string; name: string; endpoint: string; model: string; key: string; envVar: string; createdAt: string }>>(`${API_BASE}/apikeys`),
+  createApiKey: (data: { name: string; endpoint: string; model: string; key: string; envVar: string }) =>
+    fetchJSON<{ id: string; name: string; endpoint: string; model: string; key: string; envVar: string; createdAt: string }>(`${API_BASE}/apikeys`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
+  updateApiKey: (id: string, data: Partial<{ name: string; endpoint: string; model: string; key: string; envVar: string }>) =>
+    fetchJSON<{ id: string; name: string; endpoint: string; model: string; key: string; envVar: string; createdAt: string }>(`${API_BASE}/apikeys/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
+  deleteApiKey: (id: string) => fetchVoid(`${API_BASE}/apikeys/${id}`, { method: 'DELETE' }),
 };

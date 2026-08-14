@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Folder, FolderPlus, Loader2, MoreVertical, Pencil, Trash2, Sun, Moon, LogOut } from 'lucide-react';
+import { Folder, FolderPlus, Loader2, MoreVertical, Pencil, Trash2, Sun, Moon, LogOut, Key } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 
@@ -28,9 +28,10 @@ interface WorkspaceSidebarProps {
   onCreate: (title: string) => Promise<void>;
   onRename: (id: string, title: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onShowApiKeys: () => void;
 }
 
-export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCreate, onRename, onDelete }: WorkspaceSidebarProps) {
+export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCreate, onRename, onDelete, onShowApiKeys }: WorkspaceSidebarProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [creating, setCreating] = useState(false);
@@ -70,6 +71,9 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCreateOpen(true)}>
             <FolderPlus className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onShowApiKeys}>
+            <Key className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { api.authLogout().catch(() => {}); window.location.reload(); }}>
             <LogOut className="h-4 w-4" />

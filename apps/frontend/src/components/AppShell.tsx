@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { WorkspaceSidebar } from './WorkspaceSidebar';
 import { WorkspaceView } from './WorkspaceView';
+import { ApiKeysPanel } from './ApiKeysPanel';
 import { X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +15,7 @@ export function AppShell() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [agents, setAgents] = useState<AgentRegistryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showApiKeys, setShowApiKeys] = useState(false);
 
   useEffect(() => {
     Promise.all([api.listWorkspaces(), api.listAgents()])
@@ -88,6 +90,7 @@ export function AppShell() {
           onCreate={handleCreate}
           onRename={handleRename}
           onDelete={handleDelete}
+          onShowApiKeys={() => setShowApiKeys(true)}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
@@ -125,7 +128,9 @@ export function AppShell() {
 
           {/* Active workspace content */}
           <div className="flex-1 overflow-hidden">
-            {activeWorkspace ? (
+            {showApiKeys ? (
+              <ApiKeysPanel onBack={() => setShowApiKeys(false)} />
+            ) : activeWorkspace ? (
               <WorkspaceView key={activeWorkspace.id} workspace={activeWorkspace} agents={agents} />
             ) : (
               <div className="flex h-full flex-col items-center justify-center text-center">
