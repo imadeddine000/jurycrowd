@@ -36,6 +36,8 @@ export function createOrAttachDetached(name: string, cwd: string, command: strin
   );
   // Disable the tmux status bar (green line at bottom) for a clean terminal look
   run('tmux set -g status off 2>/dev/null');
+  // Enable mouse support so scroll wheel scrolls through tmux history instead of sending arrow keys
+  run('tmux set -g mouse on 2>/dev/null');
   return result.ok;
 }
 
