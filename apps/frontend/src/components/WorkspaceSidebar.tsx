@@ -57,6 +57,11 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
     try { await onDelete(deleteWs.id); setDeleteWs(null); } catch {} finally { setDeleting(false); }
   };
 
+  const handleLogout = async () => {
+    try { await api.authLogout(); } catch {}
+    window.location.reload();
+  };
+
   return (
     <div className="flex h-full flex-col bg-secondary/30">
       <div className="flex items-center justify-between border-b px-3 py-2.5">
@@ -74,9 +79,6 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onShowApiKeys}>
             <Key className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { api.authLogout().catch(() => {}); window.location.reload(); }}>
-            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -107,6 +109,13 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
             </div>
           ))
         )}
+      </div>
+
+      {/* Bottom section — logout */}
+      <div className="border-t p-2">
+        <Button variant="ghost" className="w-full justify-start gap-2 text-sm text-muted-foreground" onClick={handleLogout}>
+          <LogOut className="h-4 w-4" /> Logout
+        </Button>
       </div>
 
       {/* Create dialog */}
