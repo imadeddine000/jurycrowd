@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { WorkspaceDTO } from '@jurycrowd/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,10 +29,10 @@ interface WorkspaceSidebarProps {
   onCreate: (title: string) => Promise<void>;
   onRename: (id: string, title: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
-  onShowApiKeys: () => void;
 }
 
-export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCreate, onRename, onDelete, onShowApiKeys }: WorkspaceSidebarProps) {
+export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCreate, onRename, onDelete }: WorkspaceSidebarProps) {
+  const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [creating, setCreating] = useState(false);
@@ -77,7 +78,7 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCreateOpen(true)}>
             <FolderPlus className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onShowApiKeys}>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate('/api-keys')}>
             <Key className="h-4 w-4" />
           </Button>
         </div>
