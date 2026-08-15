@@ -34,6 +34,8 @@ export function createOrAttachDetached(name: string, cwd: string, command: strin
   const result = run(
     `tmux new-session -A -d -s ${JSON.stringify(name)} -c ${JSON.stringify(cwd)} ${JSON.stringify(fullCommand)}`,
   );
+  // Disable the tmux status bar (green line at bottom) for a clean terminal look
+  run('tmux set -g status off 2>/dev/null');
   return result.ok;
 }
 
