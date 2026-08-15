@@ -78,9 +78,6 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCreateOpen(true)}>
             <FolderPlus className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate('/api-keys')}>
-            <Key className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
@@ -112,8 +109,11 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
         )}
       </div>
 
-      {/* Bottom section — logout */}
-      <div className="border-t p-2">
+      {/* Bottom section — API Keys + Logout */}
+      <div className="border-t p-2 space-y-1">
+        <Button variant="ghost" className="w-full justify-start gap-2 text-sm text-muted-foreground" onClick={() => navigate('/api-keys')}>
+          <Key className="h-4 w-4" /> API Keys
+        </Button>
         <Button variant="ghost" className="w-full justify-start gap-2 text-sm text-muted-foreground" onClick={handleLogout}>
           <LogOut className="h-4 w-4" /> Logout
         </Button>
