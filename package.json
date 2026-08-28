@@ -27,6 +27,7 @@
     "dev:backend": "pnpm --filter=backend dev",
     "dev:frontend": "pnpm --filter=frontend dev",
     "build": "pnpm -r build",
+    "build:cli": "pnpm --filter=jurycrowd build",
     "lint": "pnpm -r lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
