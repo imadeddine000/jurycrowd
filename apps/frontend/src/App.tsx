@@ -23,7 +23,7 @@ export default function App() {
         <Route path="/api-keys" element={authenticated ? <ApiKeysPage /> : <Navigate to="/" replace />} />
         <Route path="/*" element={authenticated ? <AppShell /> : <LoginPage onAuthenticated={() => setAuthenticated(true)} />} />
       </Routes>
-      <Toaster richColors position="bottom-right" theme="dark" />
+      <Toaster richColors position="bottom-right" theme="light" />
     </BrowserRouter>
   );
 }

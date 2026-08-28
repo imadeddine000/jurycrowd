@@ -1,55 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 @layer base {
   :root {
-    /* Light theme — warm cream canvas (DESIGN.md) */
-    --background: 40 33% 97%;           /* #faf9f5 — cream canvas */
-    --foreground: 40 5% 8%;             /* #141413 — dark warm ink */
-    --card: 40 30% 90%;                 /* #efe9de — light cream card */
-    --card-foreground: 40 5% 8%;
-    --popover: 40 33% 97%;
-    --popover-foreground: 40 5% 8%;
-    --primary: 18 47% 58%;              /* #cc785c — coral */
-    --primary-foreground: 40 33% 97%;
-    --secondary: 40 25% 94%;            /* #f5f0e8 — surface soft */
-    --secondary-foreground: 40 5% 8%;
-    --muted: 40 25% 94%;
-    --muted-foreground: 40 8% 42%;
-    --accent: 40 25% 94%;
-    --accent-foreground: 40 5% 8%;
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 40 33% 97%;
-    --border: 40 15% 85%;               /* #e6dfd8 */
-    --input: 40 15% 85%;
-    --ring: 18 47% 58%;                 /* coral */
+    /* ── Design system (DESIGN.md) — cream canvas is the default floor ── */
+
+    /* Brand & accent (constant across themes) */
+    --coral: 18 47% 58%;            /* #cc785c — primary */
+    --coral-active: 15 46% 45%;     /* #a9583e — press */
+    --coral-disabled: 34 22% 85%;   /* #e6dfd8 */
+    --teal: 168 39% 54%;            /* #5db8a6 */
+    --amber: 32 76% 63%;            /* #e8a55a */
+
+    /* Dark product surfaces (constant — terminal / code chrome) */
+    --surface-dark: 40 7% 9%;          /* #181715 */
+    --surface-dark-elevated: 36 7% 14%;/* #252320 */
+    --surface-dark-soft: 45 7% 11%;    /* #1f1e1b */
+    --on-dark: 40 33% 97%;             /* #faf9f5 */
+    --on-dark-soft: 42 5% 61%;         /* #a09d96 */
+
+    /* Semantic (constant) */
+    --success: 134 39% 54%;         /* #5db872 */
+    --warning: 44 80% 46%;          /* #d4a017 */
+    --error: 0 53% 52%;             /* #c64545 */
+
+    /* Theme-aware surfaces — LIGHT (cream) */
+    --canvas: 40 33% 97%;           /* #faf9f5 */
+    --surface-soft: 40 25% 94%;     /* #f5f0e8 */
+    --surface-card: 40 30% 90%;     /* #efe9de */
+    --surface-cream-strong: 38 36% 86%; /* #e8e0d2 */
+    --hairline: 34 22% 85%;         /* #e6dfd8 */
+    --hairline-soft: 38 24% 89%;    /* #ebe6df */
+
+    /* Theme-aware text — LIGHT */
+    --ink: 40 5% 8%;                /* #141413 */
+    --body-strong: 60 3% 14%;       /* #252523 */
+    --body: 60 3% 24%;              /* #3d3d3a */
+    --muted-ink: 43 4% 41%;         /* #6c6a64 */
+    --muted-soft-ink: 40 5% 53%;    /* #8e8b82 */
+
+    /* shadcn semantic mapping (light) */
+    --background: var(--canvas);
+    --foreground: var(--ink);
+    --card: var(--surface-card);
+    --card-foreground: var(--ink);
+    --popover: var(--canvas);
+    --popover-foreground: var(--ink);
+    --primary: var(--coral);
+    --primary-foreground: 0 0% 100%;
+    --primary-active: var(--coral-active);
+    --primary-disabled: var(--coral-disabled);
+    --secondary: var(--surface-soft);
+    --secondary-foreground: var(--ink);
+    --muted: var(--surface-soft);
+    --muted-foreground: var(--muted-ink);
+    --accent: var(--surface-soft);
+    --accent-foreground: var(--ink);
+    --destructive: var(--error);
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--hairline);
+    --input: var(--hairline);
+    --ring: var(--coral);
     --radius: 0.5rem;
   }
 
   .dark {
-    /* Dark theme — warm dark navy (DESIGN.md surface-dark) */
-    --background: 40 6% 9%;             /* #181715 — dark navy */
-    --foreground: 40 33% 97%;           /* cream text */
-    --card: 40 5% 11%;                  /* slightly lighter */
-    --card-foreground: 40 33% 97%;
-    --popover: 40 6% 9%;
-    --popover-foreground: 40 33% 97%;
-    --primary: 18 47% 58%;              /* coral stays */
-    --primary-foreground: 40 33% 97%;
-    --secondary: 40 5% 14%;
-    --secondary-foreground: 40 33% 97%;
-    --muted: 40 5% 14%;
-    --muted-foreground: 40 8% 63%;
-    --accent: 40 5% 14%;
-    --accent-foreground: 40 33% 97%;
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 40 33% 97%;
-    --border: 40 5% 17%;
-    --input: 40 5% 17%;
-    --ring: 18 47% 58%;                 /* coral */
+    /* Theme-aware surfaces — DARK (navy product surface) */
+    --canvas: 40 7% 9%;             /* #181715 */
+    --surface-soft: 45 7% 11%;      /* #1f1e1b */
+    --surface-card: 36 7% 14%;      /* #252320 */
+    --surface-cream-strong: 36 7% 14%;
+    --hairline: 38 8% 22%;          /* #3a3835 */
+    --hairline-soft: 40 6% 17%;     /* #2e2c29 */
+
+    /* Theme-aware text — DARK */
+    --ink: 40 33% 97%;              /* #faf9f5 */
+    --body-strong: 39 36% 86%;      /* #e8e0d2 */
+    --body: 40 14% 80%;             /* #c9c5bc */
+    --muted-ink: 42 5% 61%;         /* #a09d96 */
+    --muted-soft-ink: 40 5% 53%;    /* #8e8b82 */
+
+    /* shadcn semantic mapping (dark) */
+    --background: var(--canvas);
+    --foreground: var(--ink);
+    --card: var(--surface-card);
+    --card-foreground: var(--ink);
+    --popover: var(--surface-dark-elevated);
+    --popover-foreground: var(--ink);
+    --secondary: var(--surface-dark-soft);
+    --secondary-foreground: var(--ink);
+    --muted: var(--surface-dark-soft);
+    --muted-foreground: var(--muted-ink);
+    --accent: var(--surface-dark-soft);
+    --accent-foreground: var(--ink);
+    --border: var(--hairline);
+    --input: var(--hairline);
+    /* primary / ring / destructive stay constant */
   }
 }
 
@@ -61,7 +110,22 @@
     @apply h-full;
   }
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-canvas text-ink antialiased;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
   }
+  /* Editorial serif display is applied explicitly via .font-serif on display
+     headlines (Copernicus/Tiempos substitute → Fraunces). UI labels stay sans. */
+  ::selection {
+    background: hsl(var(--coral) / 0.25);
+    color: hsl(var(--ink));
+  }
+  /* Refined scrollbars — hairline thumb on transparent track */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--hairline)) transparent;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-thumb { background: hsl(var(--hairline)); border-radius: 9999px; }
+  *::-webkit-scrollbar-track { background: transparent; }
 }
