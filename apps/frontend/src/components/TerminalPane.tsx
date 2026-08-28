@@ -64,7 +64,7 @@ export function TerminalPane({ window: win, onKill, tmuxSessionName }: TerminalP
   }, [win.refId]);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden border-b border-r border-surface-dark-soft bg-surface-dark">
+    <div className="flex h-full w-full min-h-0 min-w-0 flex-col overflow-hidden border-b border-r border-surface-dark-soft bg-surface-dark">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-surface-dark-soft bg-surface-dark-elevated px-3 py-1.5">
         <div className="flex items-center gap-2">
@@ -97,7 +97,7 @@ export function TerminalPane({ window: win, onKill, tmuxSessionName }: TerminalP
       </div>
       {/* Terminal */}
       <div
-        className={cn('flex-1 overflow-hidden relative', dragOver && 'ring-2 ring-coral ring-inset bg-coral/5')}
+        className={cn('min-h-0 flex-1 overflow-hidden relative', dragOver && 'ring-2 ring-coral ring-inset bg-coral/5')}
         onDrop={handleDrop}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}

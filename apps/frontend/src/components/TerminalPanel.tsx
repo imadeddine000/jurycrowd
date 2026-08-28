@@ -47,7 +47,12 @@ export function TerminalPanel({ sessionId, onStatusChange }: TerminalPanelProps)
     term.loadAddon(fitAddon);
     term.open(containerRef.current);
 
-    fitAddon.fit();
+    // Fit the terminal to its container. Grid/flex layouts may not have
+    // settled synchronously, so fit on the next animation frames; the
+    // ResizeObserver below handles later resizes (e.g. adding/removing agents).
+    const safeFit = () => { try { fitAddon.fit(); } catch { /* not sized yet */ } };
+    requestAnimationFrame(safeFit);
+    requestAnimationFrame(() => requestAnimationFrame(safeFit));
 
     // Connect to WS
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -89,7 +94,7 @@ export function TerminalPanel({ sessionId, onStatusChange }: TerminalPanelProps)
 
     // Resize handling
     const resizeObserver = new ResizeObserver(() => {
-      fitAddon.fit();
+      safeFit();
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
       }
@@ -114,8 +119,8 @@ export function TerminalPanel({ sessionId, onStatusChange }: TerminalPanelProps)
   }, [sessionId, onStatusChange]);
 
   return (
-    <div className="relative h-full w-full bg-surface-dark">
-      <div ref={containerRef} className="h-full w-full" />
+    <div className="relative h-full w-full overflow-hidden bg-surface-dark">
+      <div ref={containerRef} className="h-full w-full overflow-hidden" />
       {status === 'connecting' && (
         <div className="absolute inset-0 flex items-center justify-center text-body-sm text-on-dark-soft">
           Connecting...
