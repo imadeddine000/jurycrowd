@@ -1,0 +1,52 @@
+{
+  "name": "jurycrowd",
+  "version": "0.1.0",
+  "description": "Open-source multi-agent workspace manager — run AI coding agents side-by-side in resizable terminal panels.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "jurycrowd": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "prisma"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "tsx src/cli.ts start",
+    "lint": "tsc --noEmit",
+    "start": "node dist/cli.js start",
+    "postinstall": "DATABASE_URL=file:./jurycrowd.db prisma generate --schema=prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "commander": "^12.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "node-pty": "^1.1.0",
+    "prisma": "^6.19.3",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20.11"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "coding-agent",
+    "cline",
+    "terminal",
+    "tmux",
+    "workspace",
+    "multi-agent",
+    "developer-tools",
+    "cli"
+  ]
+}

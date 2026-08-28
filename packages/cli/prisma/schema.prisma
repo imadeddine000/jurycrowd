@@ -1,0 +1,81 @@
+// Agent Workspace — Prisma schema
+// Data model per architecture spec §4.
+// All models defined upfront to avoid migrations; routes implemented task-by-task.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  title     String
+  cwd       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  windows    AppWindow[]
+  sessions   AgentSession[]
+  notes      Note[]
+  skills     Skill[]
+  githubRepo GithubRepoLink?
+}
+
+model AgentSession {
+  id            String   @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  agentType     String
+  tmuxSession   String   @unique
+  status        String   @default("running")
+  launchCommand String
+  createdAt     DateTime @default(now())
+  lastAttached  DateTime @default(now())
+}
+
+model AppWindow {
+  id          String   @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  kind        String
+  refId       String?
+  x           Float
+  y           Float
+  width       Float
+  height      Float
+  zIndex      Int
+  minimized   Boolean  @default(false)
+  maximized   Boolean  @default(false)
+  title       String
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  title       String
+  filePath    String
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  filePath    String
+  updatedAt   DateTime @updatedAt
+}
+
+model GithubRepoLink {
+  id            String   @id @default(cuid())
+  workspaceId   String   @unique
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  remoteUrl     String
+  defaultBranch String
+  connectedAt   DateTime @default(now())
+}
