@@ -21,6 +21,7 @@ import {
 import { Folder, FolderPlus, Loader2, MoreVertical, Pencil, Trash2, Sun, Moon, LogOut, Key } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
+import { SpikeMark } from '@/components/ui/SpikeMark';
 
 interface WorkspaceSidebarProps {
   workspaces: WorkspaceDTO[];
@@ -64,34 +65,40 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
   };
 
   return (
-    <div className="flex h-full flex-col bg-secondary/30">
-      <div className="flex items-center justify-between border-b px-3 py-2.5">
-        <span className="text-sm font-semibold">Workspaces</span>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-          }}>
-            <Sun className="h-4 w-4 hidden dark:block" />
-            <Moon className="h-4 w-4 block dark:hidden" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCreateOpen(true)}>
-            <FolderPlus className="h-4 w-4" />
-          </Button>
+    <div className="flex h-full flex-col border-r border-hairline bg-canvas">
+      {/* Brand header — spike-mark + wordmark */}
+      <div className="flex items-center justify-between border-b border-hairline px-3 py-3">
+        <div className="flex items-center gap-1.5">
+          <SpikeMark className="h-4 w-4" accent />
+          <span className="font-serif text-title-sm text-ink">JuryCrowd</span>
         </div>
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+          const isDark = document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }}>
+          <Sun className="h-4 w-4 hidden dark:block" />
+          <Moon className="h-4 w-4 block dark:hidden" />
+        </Button>
+      </div>
+      {/* Section label + new workspace */}
+      <div className="flex items-center justify-between px-3 py-2">
+        <span className="text-caption-uppercase text-muted-ink">Workspaces</span>
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCreateOpen(true)}>
+          <FolderPlus className="h-4 w-4" />
+        </Button>
       </div>
 
       <div className="flex-1 overflow-y-auto py-1">
         {workspaces.length === 0 ? (
-          <p className="px-3 py-4 text-center text-xs text-muted-foreground">No workspaces yet.</p>
+          <p className="px-3 py-4 text-center text-caption text-muted-ink">No workspaces yet.</p>
         ) : (
           workspaces.map((ws) => (
-            <div key={ws.id} className={cn('group flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors', ws.id === activeWorkspaceId ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-foreground')}>
-              <Folder className="h-3.5 w-3.5 shrink-0" />
+            <div key={ws.id} className={cn('group flex w-full items-center gap-2 rounded-md px-3 py-2 text-body-sm transition-colors', ws.id === activeWorkspaceId ? 'bg-surface-card text-ink' : 'text-body hover:bg-surface-soft hover:text-ink')}>
+              <Folder className="h-3.5 w-3.5 shrink-0 text-muted-ink" />
               <button onClick={() => onSelect(ws.id)} className="flex-1 truncate text-left">{ws.title}</button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-0.5 opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100 data-[state=open]:opacity-100">
+                  <button className="p-0.5 opacity-0 transition-opacity hover:bg-surface-soft group-hover:opacity-100 data-[state=open]:opacity-100">
                     <MoreVertical className="h-3 w-3" />
                   </button>
                 </DropdownMenuTrigger>
@@ -110,11 +117,11 @@ export function WorkspaceSidebar({ workspaces, activeWorkspaceId, onSelect, onCr
       </div>
 
       {/* Bottom section — API Keys + Logout */}
-      <div className="border-t p-2 space-y-1">
-        <Button variant="ghost" className="w-full justify-start gap-2 text-sm text-muted-foreground" onClick={() => navigate('/api-keys')}>
+      <div className="border-t border-hairline p-2 space-y-1">
+        <Button variant="ghost" className="w-full justify-start gap-2 text-body-sm text-muted-ink" onClick={() => navigate('/api-keys')}>
           <Key className="h-4 w-4" /> API Keys
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2 text-sm text-muted-foreground" onClick={handleLogout}>
+        <Button variant="ghost" className="w-full justify-start gap-2 text-body-sm text-muted-ink" onClick={handleLogout}>
           <LogOut className="h-4 w-4" /> Logout
         </Button>
       </div>

@@ -7,6 +7,7 @@ import { WorkspaceSidebar } from './WorkspaceSidebar';
 import { WorkspaceView } from './WorkspaceView';
 import { X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SpikeMark } from '@/components/ui/SpikeMark';
 
 export function AppShell() {
   const [workspaces, setWorkspaces] = useState<WorkspaceDTO[]>([]);
@@ -71,8 +72,8 @@ export function AppShell() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <Loader2 className="h-6 w-6 animate-spin text-coral" />
       </div>
     );
   }
@@ -96,7 +97,7 @@ export function AppShell() {
       <ResizablePanel defaultSize={84}>
         <div className="flex h-full flex-col">
           {/* Top bar with workspace tabs (Windows-style) */}
-          <div className="flex items-stretch border-b bg-secondary/40">
+          <div className="flex items-stretch border-b border-hairline bg-surface-soft/40">
             {openIds.map((id) => {
               const ws = wsMap.get(id);
               if (!ws) return null;
@@ -105,16 +106,16 @@ export function AppShell() {
                   key={id}
                   onClick={() => setActiveId(id)}
                   className={cn(
-                    'group flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm transition-colors',
+                    'group flex cursor-pointer items-center gap-2 px-4 py-2 text-body-sm transition-colors',
                     id === activeId
-                      ? 'bg-card text-foreground'
-                      : 'text-muted-foreground hover:bg-secondary',
+                      ? 'bg-canvas text-ink'
+                      : 'text-muted-ink hover:bg-surface-soft',
                   )}
                 >
                   <span className="max-w-[140px] truncate">{ws.title}</span>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleCloseTab(id); }}
-                    className="p-0.5 opacity-0 transition-opacity hover:bg-destructive/20 group-hover:opacity-100"
+                    className="p-0.5 opacity-0 transition-opacity hover:bg-error/15 group-hover:opacity-100"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -128,9 +129,10 @@ export function AppShell() {
             {activeWorkspace ? (
               <WorkspaceView key={activeWorkspace.id} workspace={activeWorkspace} agents={agents} />
             ) : (
-              <div className="flex h-full flex-col items-center justify-center text-center">
-                <p className="text-sm text-muted-foreground">No workspace selected</p>
-                <p className="mt-1 text-xs text-muted-foreground/60">Select one from the sidebar or create a new one.</p>
+              <div className="flex h-full flex-col items-center justify-center text-center px-6">
+                <SpikeMark className="h-6 w-6 text-coral/70" />
+                <p className="mt-4 font-serif text-display-sm text-ink">No workspace selected</p>
+                <p className="mt-2 text-body-sm text-muted-ink">Select one from the sidebar or create a new one.</p>
               </div>
             )}
           </div>
