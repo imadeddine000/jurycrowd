@@ -65,14 +65,14 @@ export function GitHubPanel({ workspaceId }: GitHubPanelProps) {
   if (!connected) {
     return (
       <div className="flex h-full flex-col items-center justify-center p-4 gap-3">
-        <Github className="h-8 w-8 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground text-center">Connect your GitHub account to clone repos into this workspace.</p>
+        <Github className="h-8 w-8 text-muted-ink" />
+        <p className="text-body-sm text-muted-ink text-center">Connect your GitHub account to clone repos into this workspace.</p>
         <Input type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder="GitHub Personal Access Token" onKeyDown={(e) => e.key === 'Enter' && handleConnect()} className="max-w-xs" />
-        {error && <p className="text-xs text-destructive">{error}</p>}
+        {error && <p className="text-caption text-error">{error}</p>}
         <Button onClick={handleConnect} disabled={connecting || !token.trim()}>
           {connecting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Connect'}
         </Button>
-        <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:text-foreground underline">Create a token →</a>
+        <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank" rel="noreferrer" className="text-caption text-coral hover:underline">Create a token →</a>
       </div>
     );
   }
@@ -81,12 +81,12 @@ export function GitHubPanel({ workspaceId }: GitHubPanelProps) {
     <div className="flex h-full flex-col">
       {/* Git status bar */}
       {status?.initialized && (
-        <div className="flex items-center gap-2 border-b bg-secondary/50 px-3 py-1.5 text-xs">
+        <div className="flex items-center gap-2 border-b border-hairline bg-surface-soft/50 px-3 py-1.5 text-caption">
           <GitBranch className="h-3 w-3" />
           <span className="font-medium">{status.branch}</span>
-          {status.ahead! > 0 && <span className="text-green-500">↑{status.ahead}</span>}
-          {status.behind! > 0 && <span className="text-orange-500">↓{status.behind}</span>}
-          {status.dirty! > 0 && <span className="text-yellow-500">●{status.dirty}</span>}
+          {status.ahead! > 0 && <span className="text-success">↑{status.ahead}</span>}
+          {status.behind! > 0 && <span className="text-amber">↓{status.behind}</span>}
+          {status.dirty! > 0 && <span className="text-warning">●{status.dirty}</span>}
           <Button variant="ghost" size="icon" className="ml-auto h-5 w-5" onClick={loadStatus}>
             <RefreshCw className="h-3 w-3" />
           </Button>
@@ -94,19 +94,19 @@ export function GitHubPanel({ workspaceId }: GitHubPanelProps) {
       )}
 
       {/* Repo list */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b">
-        <span className="text-xs font-medium text-muted-foreground">Repositories</span>
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-hairline">
+        <span className="text-caption font-medium text-muted-ink">Repositories</span>
         <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={handleDisconnect}>Disconnect</Button>
       </div>
       <div className="flex-1 overflow-y-auto">
         {loadingRepos ? (
           <div className="flex h-full items-center justify-center"><Loader2 className="h-5 w-5 animate-spin" /></div>
         ) : repos.length === 0 ? (
-          <p className="p-3 text-center text-xs text-muted-foreground">No repos found</p>
+          <p className="p-3 text-center text-caption text-muted-ink">No repos found</p>
         ) : (
           repos.map((repo) => (
-            <div key={repo.full_name} className="group flex items-center gap-2 border-b px-3 py-2 text-sm hover:bg-secondary">
-              {repo.private ? <Lock className="h-3 w-3 text-muted-foreground" /> : <Github className="h-3 w-3 text-muted-foreground" />}
+            <div key={repo.full_name} className="group flex items-center gap-2 border-b border-hairline px-3 py-2 text-body-sm hover:bg-surface-soft">
+              {repo.private ? <Lock className="h-3 w-3 text-muted-ink" /> : <Github className="h-3 w-3 text-muted-ink" />}
               <span className="flex-1 truncate">{repo.full_name}</span>
               <Button variant="ghost" size="sm" className="h-6 opacity-0 group-hover:opacity-100" disabled={cloning === repo.full_name} onClick={() => handleClone(repo)}>
                 {cloning === repo.full_name ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Clone'}
@@ -115,7 +115,7 @@ export function GitHubPanel({ workspaceId }: GitHubPanelProps) {
           ))
         )}
       </div>
-      {error && <div className="flex items-center gap-1 border-t px-3 py-1.5 text-xs text-destructive"><AlertCircle className="h-3 w-3" />{error}</div>}
+      {error && <div className="flex items-center gap-1 border-t border-hairline px-3 py-1.5 text-caption text-error"><AlertCircle className="h-3 w-3" />{error}</div>}
     </div>
   );
 }
