@@ -1,15 +1,22 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}
-      {...props}
-    />
-  ),
-);
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { variant?: 'feature' | 'dark' | 'outline' }
+>(({ className, variant = 'feature', ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      'rounded-lg',
+      variant === 'feature' && 'bg-surface-card text-ink',
+      variant === 'dark' && 'bg-surface-dark text-on-dark',
+      variant === 'outline' && 'border border-hairline bg-canvas text-ink',
+      className,
+    )}
+    {...props}
+  />
+));
 Card.displayName = 'Card';
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -23,7 +30,7 @@ const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HT
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+      className={cn('font-sans text-title-md font-medium leading-snug tracking-tight', className)}
       {...props}
     />
   ),
