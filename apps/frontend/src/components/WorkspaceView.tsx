@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { AppWindowDTO, AgentRegistryEntry, AgentSessionDTO, WorkspaceDTO } from '@jurycrowd/shared';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,10 @@ import { TerminalPane } from './TerminalPane';
 import { MarkdownFilesPanel } from './MarkdownFilesPanel';
 import { CommandPalette } from './CommandPalette';
 import type { Command } from './CommandPalette';
-import { useDebouncedCallback } from '@/hooks/useDebounced';
 import { Plus, TerminalSquare, Folder, FileText, BookOpen, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { SpikeMark } from '@/components/ui/SpikeMark';
 
 interface WorkspaceViewProps {
   workspace: WorkspaceDTO;
@@ -18,6 +18,13 @@ interface WorkspaceViewProps {
 }
 
 type SidePanel = null | 'notes' | 'skills' | 'agents' | 'github';
+
+/** Roughly-square grid for agent terminals: cols = ceil(√n), rows = ceil(n / cols). */
+function computeGrid(n: number): { cols: number; rows: number } {
+  if (n <= 1) return { cols: 1, rows: 1 };
+  const cols = Math.ceil(Math.sqrt(n));
+  return { cols, rows: Math.ceil(n / cols) };
+}
 
 export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
   const [terminalWindows, setTerminalWindows] = useState<AppWindowDTO[]>([]);
@@ -96,42 +103,28 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
     { label: 'Toggle Theme', action: () => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); } },
   ], [sidePanel, handleNewAgent, handleToggleTerminal]);
 
-  // --- Panel layout persistence ---
-  const layoutInitialized = useRef(false);
-  const debouncedSaveLayout = useDebouncedCallback(
-    (updates: { id: string; width: number }[]) => {
-      updates.forEach(({ id, width }) => { api.updateWindow(id, { width }).catch(() => {}); });
-    }, 500,
-  );
-  const handleLayout = useCallback((sizes: number[]) => {
-    if (!layoutInitialized.current) { layoutInitialized.current = true; return; }
-    const total = sizes.reduce((a, b) => a + b, 0);
-    if (total === 0) return;
-    const updates = agentWindows.map((tw, i) => ({ id: tw.id, width: Math.round((sizes[i] / total) * 10000) / 100 }));
-    debouncedSaveLayout(updates);
-  }, [agentWindows, debouncedSaveLayout]);
-
-  // --- Main content: agents (horizontal, top) + terminal (bottom, vertical resize) ---
+  // --- Main content: agents in an equal-size grid + optional terminal (bottom) ---
+  const { cols, rows } = computeGrid(agentWindows.length);
   const agentsContent = agentWindows.length === 0 ? (
-    <div className="flex h-full flex-col items-center justify-center text-center">
-      <TerminalSquare className="h-12 w-12 text-muted-foreground/30" />
-      <p className="mt-4 text-sm text-muted-foreground">No agents running</p>
-      <p className="mt-1 text-xs text-muted-foreground/60">Click "New agent" to launch an agent.</p>
+    <div className="flex h-full flex-col items-center justify-center bg-canvas text-center px-6">
+      <SpikeMark className="h-7 w-7 text-coral/60" />
+      <p className="mt-4 font-serif text-display-sm text-ink">No agents running</p>
+      <p className="mt-2 text-body-sm text-muted-ink">Click "New agent" to launch an agent.</p>
     </div>
   ) : (
-    <ResizablePanelGroup direction="horizontal" onLayout={handleLayout}>
-      {agentWindows.flatMap((tw, i) => {
-        const elements: React.ReactNode[] = [];
-        if (i > 0) elements.push(<ResizableHandle key={`h-${tw.id}`} withHandle />);
-        const savedSize = tw.width > 0 && tw.width <= 100 ? tw.width : 100 / agentWindows.length;
-        elements.push(
-          <ResizablePanel key={tw.id} defaultSize={savedSize} minSize={10}>
-            <TerminalPane window={tw} onKill={() => handleCloseTerminal(tw.id)} tmuxSessionName={sessionMap.get(tw.refId ?? '')?.tmuxSession ?? ''} />
-          </ResizablePanel>
-        );
-        return elements;
-      })}
-    </ResizablePanelGroup>
+    <div
+      className="grid h-full w-full bg-surface-dark"
+      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}
+    >
+      {agentWindows.map((tw) => (
+        <TerminalPane
+          key={tw.id}
+          window={tw}
+          onKill={() => handleCloseTerminal(tw.id)}
+          tmuxSessionName={sessionMap.get(tw.refId ?? '')?.tmuxSession ?? ''}
+        />
+      ))}
+    </div>
   );
 
   const terminalsContent = terminalWin ? (
@@ -150,9 +143,9 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
 
   // --- Side panel content (only for agents picker now) ---
   const sidePanelContent = (
-    <div className="flex h-full flex-col bg-card">
-      <div className="flex items-center justify-between border-b bg-secondary px-3 py-1.5">
-        <span className="text-sm font-medium">New Agent</span>
+    <div className="flex h-full flex-col bg-surface-card">
+      <div className="flex items-center justify-between border-b border-hairline bg-surface-soft px-3 py-2">
+        <span className="text-title-sm text-ink">New Agent</span>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSidePanel(null)}>
           <X className="h-3 w-3" />
         </Button>
@@ -161,10 +154,10 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
         <div className="space-y-1 p-2">
           {agents.filter((a) => a.type !== 'terminal').map((a) => (
             <button key={a.type} disabled={!a.available} onClick={() => handleNewAgent(a.type)}
-              className={cn('flex w-full items-center gap-2 border px-3 py-2 text-left text-sm transition-colors', a.available ? 'hover:bg-accent' : 'cursor-not-allowed opacity-50')}>
-              <TerminalSquare className="h-4 w-4 text-muted-foreground" />
+              className={cn('flex w-full items-center gap-2 rounded-md border border-hairline px-3 py-2 text-left text-body-sm text-ink transition-colors', a.available ? 'hover:bg-surface-soft' : 'cursor-not-allowed opacity-50')}>
+              <TerminalSquare className="h-4 w-4 text-muted-ink" />
               <span className="flex-1">{a.label}</span>
-              {!a.available && <span className="text-xs text-muted-foreground">not installed</span>}
+              {!a.available && <span className="text-caption text-muted-ink">not installed</span>}
             </button>
           ))}
         </div>
@@ -178,9 +171,9 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
     <div className="flex h-full flex-col">
       {/* Toolbar — hidden when in full-page notes/skills view */}
       {!isFullPageView && (
-        <div className="flex items-center gap-2 border-b bg-secondary/30 px-3 py-1.5">
-          <Folder className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">{workspace.title}</span>
+        <div className="flex items-center gap-2 border-b border-hairline bg-surface-soft/40 px-3 py-2">
+          <Folder className="h-4 w-4 text-muted-ink" />
+          <span className="text-title-sm text-ink">{workspace.title}</span>
           <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setSidePanel('notes')}>
               <FileText className="h-3.5 w-3.5" /> Notes
@@ -191,7 +184,7 @@ export function WorkspaceView({ workspace, agents }: WorkspaceViewProps) {
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleToggleTerminal}>
               <TerminalSquare className="h-3.5 w-3.5" /> Terminal
             </Button>
-            <Button variant="outline" size="sm" className={cn('gap-1.5', sidePanel === 'agents' && 'bg-accent')} onClick={() => setSidePanel(sidePanel === 'agents' ? null : 'agents')}>
+            <Button variant="default" size="sm" className={cn('gap-1.5', sidePanel === 'agents' && 'ring-2 ring-coral/30')} onClick={() => setSidePanel(sidePanel === 'agents' ? null : 'agents')}>
               <Plus className="h-3.5 w-3.5" /> New agent
             </Button>
           </div>
