@@ -16,19 +16,37 @@ export function TerminalPanel({ sessionId, onStatusChange }: TerminalPanelProps)
     if (!containerRef.current) return;
 
     const term = new Terminal({
-      fontFamily: 'monospace',
+      fontFamily: '"JetBrains Mono", "Berkeley Mono", monospace',
       fontSize: 13,
       cursorBlink: true,
       theme: {
-        background: '#0f0f0f',
-        foreground: '#e0e0e0',
-        cursor: '#e0e0e0',
+        background: '#181715',
+        foreground: '#faf9f5',
+        cursor: '#cc785c',
+        selectionBackground: 'rgba(204,120,92,0.3)',
+        black: '#181715',
+        red: '#c64545',
+        green: '#5db872',
+        yellow: '#e8a55a',
+        blue: '#7a9ec5',
+        magenta: '#cc785c',
+        cyan: '#5db8a6',
+        white: '#faf9f5',
+        brightBlack: '#a09d96',
+        brightRed: '#d97070',
+        brightGreen: '#7dca8e',
+        brightYellow: '#f0bd76',
+        brightBlue: '#9bb6d6',
+        brightMagenta: '#dc927a',
+        brightCyan: '#7dcab6',
+        brightWhite: '#faf9f5',
       },
     });
 
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
     term.open(containerRef.current);
+
     fitAddon.fit();
 
     // Connect to WS
@@ -96,15 +114,15 @@ export function TerminalPanel({ sessionId, onStatusChange }: TerminalPanelProps)
   }, [sessionId, onStatusChange]);
 
   return (
-    <div className="relative h-full w-full bg-[#0f0f0f]">
+    <div className="relative h-full w-full bg-surface-dark">
       <div ref={containerRef} className="h-full w-full" />
       {status === 'connecting' && (
-        <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+        <div className="absolute inset-0 flex items-center justify-center text-body-sm text-on-dark-soft">
           Connecting...
         </div>
       )}
       {status === 'error' && (
-        <div className="absolute inset-0 flex items-center justify-center text-sm text-destructive">
+        <div className="absolute inset-0 flex items-center justify-center text-body-sm text-error">
           Connection error
         </div>
       )}

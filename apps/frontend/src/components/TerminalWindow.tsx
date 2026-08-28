@@ -23,12 +23,12 @@ interface TerminalWindowProps {
 }
 
 const statusColors: Record<string, string> = {
-  running: 'bg-green-500',
-  connecting: 'bg-yellow-500',
-  exited: 'bg-gray-500',
-  crashed: 'bg-red-500',
-  error: 'bg-red-500',
-  killed: 'bg-gray-500',
+  running: 'bg-success',
+  connecting: 'bg-amber',
+  exited: 'bg-muted-soft-ink',
+  crashed: 'bg-error',
+  error: 'bg-error',
+  killed: 'bg-muted-soft-ink',
 };
 
 export function TerminalWindow({
@@ -92,22 +92,22 @@ export function TerminalWindow({
     >
       <div
         className={cn(
-          'flex h-full flex-col overflow-hidden rounded-lg border bg-card shadow-lg',
-          isActive ? 'border-primary/60 ring-1 ring-primary/30' : 'border-border',
+          'flex h-full flex-col overflow-hidden rounded-lg border bg-surface-dark shadow-subtle',
+          isActive ? 'border-coral/60 ring-1 ring-coral/30' : 'border-surface-dark-soft',
         )}
         onMouseDown={onFocus}
       >
         {/* Title bar */}
-        <div className="terminal-drag-handle flex items-center justify-between border-b bg-secondary px-3 py-1.5">
+        <div className="terminal-drag-handle flex items-center justify-between border-b border-surface-dark-soft bg-surface-dark-elevated px-3 py-1.5">
           <div className="flex items-center gap-2">
-            <TerminalSquare className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs font-medium">{win.title}</span>
-            <span className={cn('h-2 w-2 rounded-full', statusColors[status] ?? 'bg-gray-500')} />
+            <TerminalSquare className="h-3.5 w-3.5 text-on-dark-soft" />
+            <span className="text-caption font-medium text-on-dark">{win.title}</span>
+            <span className={cn('h-2 w-2 rounded-full', statusColors[status] ?? 'bg-muted-soft-ink')} />
           </div>
           <div className="flex items-center gap-0.5">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
+                <Button variant="ghostOnDark" size="icon" className="h-6 w-6">
                   <MoreVertical className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
@@ -122,7 +122,7 @@ export function TerminalWindow({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+            <Button variant="ghostOnDark" size="icon" className="h-6 w-6" onClick={onClose}>
               <X className="h-3 w-3" />
             </Button>
           </div>

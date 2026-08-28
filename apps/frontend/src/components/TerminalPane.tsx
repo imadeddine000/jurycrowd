@@ -27,12 +27,12 @@ interface TerminalPaneProps {
 }
 
 const statusColors: Record<string, string> = {
-  running: 'bg-green-500',
-  connecting: 'bg-yellow-500',
-  exited: 'bg-gray-500',
-  crashed: 'bg-red-500',
-  error: 'bg-red-500',
-  killed: 'bg-gray-500',
+  running: 'bg-success',
+  connecting: 'bg-amber',
+  exited: 'bg-muted-soft-ink',
+  crashed: 'bg-error',
+  error: 'bg-error',
+  killed: 'bg-muted-soft-ink',
 };
 
 export function TerminalPane({ window: win, onKill, tmuxSessionName }: TerminalPaneProps) {
@@ -64,18 +64,18 @@ export function TerminalPane({ window: win, onKill, tmuxSessionName }: TerminalP
   }, [win.refId]);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden border-b border-r bg-card">
+    <div className="flex h-full flex-col overflow-hidden border-b border-r border-surface-dark-soft bg-surface-dark">
       {/* Header */}
-      <div className="flex items-center justify-between border-b bg-secondary px-3 py-1.5">
+      <div className="flex items-center justify-between border-b border-surface-dark-soft bg-surface-dark-elevated px-3 py-1.5">
         <div className="flex items-center gap-2">
-          <TerminalSquare className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-xs font-medium">{win.title}</span>
-          <span className={cn('h-2 w-2 rounded-full', statusColors[status] ?? 'bg-gray-500')} />
+          <TerminalSquare className="h-3.5 w-3.5 text-on-dark-soft" />
+          <span className="text-caption font-medium text-on-dark">{win.title}</span>
+          <span className={cn('h-2 w-2 rounded-full', statusColors[status] ?? 'bg-muted-soft-ink')} />
         </div>
         <div className="flex items-center gap-0.5">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
+              <Button variant="ghostOnDark" size="icon" className="h-6 w-6">
                 <MoreVertical className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -90,22 +90,22 @@ export function TerminalPane({ window: win, onKill, tmuxSessionName }: TerminalP
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setCloseDialogOpen(true)}>
+          <Button variant="ghostOnDark" size="icon" className="h-6 w-6" onClick={() => setCloseDialogOpen(true)}>
             <X className="h-3 w-3" />
           </Button>
         </div>
       </div>
       {/* Terminal */}
       <div
-        className={cn('flex-1 overflow-hidden relative', dragOver && 'ring-2 ring-primary ring-inset bg-primary/5')}
+        className={cn('flex-1 overflow-hidden relative', dragOver && 'ring-2 ring-coral ring-inset bg-coral/5')}
         onDrop={handleDrop}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
       >
         <TerminalPanel sessionId={win.refId ?? ''} onStatusChange={setStatus} />
         {dragOver && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80 pointer-events-none">
-            <span className="text-sm text-muted-foreground">Drop to send to terminal</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-surface-dark/80 pointer-events-none">
+            <span className="text-body-sm text-on-dark-soft">Drop to send to terminal</span>
           </div>
         )}
       </div>
